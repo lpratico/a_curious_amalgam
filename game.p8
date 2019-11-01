@@ -23,7 +23,7 @@ function _draw()
 
     --draw players
     spr(1, topplayer.x + 4, topplayer.y + 4) 
-    spr(1, botplayer.x + 4, botplayer.y + 4, 1, 1, false, true)
+    spr(2, botplayer.x + 4, botplayer.y + 4, 1, 1, false, true)
 
 end
 __gfx__
