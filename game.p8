@@ -12,9 +12,13 @@ gravity = .25
 
 leveldialog={
     --{male dialog, female dialog}
+    {{"press the arrow keys to move"},{"i wonder whats behind","these doors..."}},
+    {{"fire... curious"},{"press up to jump"}},
+    {{"press z to reset"}, {"sometimes it's best","to start over"}},
+    {{"i might need a little help this time"},{"press x to link"}},
+    {{"x to unlink"},{"maybe linking isn't", "always helpful..."}},
     {{},{"sometimes i feel like","there's someone out", "there for me"}},
     {{"i wonder what it feels like", "to have a connection", "with someone..."},{}},
-    {{},{"i wonder whats behind","these doors..."}},
     {{"now that i think about it,", "sometimes i do feel","like i'm connected"},{}},
     {{},{"perhaps if i just go", "through the doors", "i'll find the one"}},
     {{"theres no doubt now,","i have a connection with someone","across time and space!"},{}},
