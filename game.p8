@@ -10,7 +10,23 @@ mapheight = 120
 jumpvel = -2.71
 gravity = .25
 
-
+leveldialog={
+    --{male dialog, female dialog}
+    {{},{"sometimes i feel like","there's someone out", "there for me"}},
+    {{"i wonder what it feels like", "to have a connection", "with someone..."},{}},
+    {{},{"i wonder whats behind","these doors..."}},
+    {{"now that i think about it,", "sometimes i do feel","like i'm connected"},{}},
+    {{},{"perhaps if i just go", "through the doors", "i'll find the one"}},
+    {{"theres no doubt now,","i have a connection with someone","across time and space!"},{}},
+    {{},{"i almost can't believe it:","with every door i go through,","i'm getting closer to love!"}},
+    {{"i have to know:","who is this person?","who shares this cosmic","bond with me?"},{}},
+    {{},{"i can feel our energies","intertwining, our bond", "must be getting stronger"}},
+    {{"is this floating feeling","what love feels like?"},{}},
+    {{},{"sometimes i feel like","i run into a wall.", "is this what falling in love","feels like?"}},
+    {{"we're getting close,", "i can sense it..."},{}},
+    {{},{"the anticipation is so intense","i can hardly bear it!"}},
+    {{},{}},
+}
 
 topplayer={
     x=0,
@@ -41,10 +57,14 @@ botplayer={
 level={
     x=0,
     y=0,
+    levelnum=1,
     linked=false,
     state="m"
 }
 
+function centertext(text, y, color)
+    print(text, 64-#text*2, y, color)
+end
 
 function postosprtop(x,y)
     return mget(level.x + flr(x/8), level.y + flr(y/8))
@@ -177,36 +197,55 @@ function resetlevel()
 end
 
 function checkspikes()
-   topcorners = getcorners(topplayer)
-   botcorners = getcorners(botplayer)
-   for i = 1,4 do
-       if (fget(postosprtop(topcorners[i][1], topcorners[i][2]), 1)) then
-           resetlevel()
-       end
-       if (fget(postosprbot(botcorners[i][1], botcorners[i][2]), 1)) then
-           resetlevel()
-       end
-   end
+    topcorners = getcorners(topplayer)
+    botcorners = getcorners(botplayer)
+    for i = 1,4 do
+        if (fget(postosprtop(topcorners[i][1], topcorners[i][2]), 1)) then
+            resetlevel()
+        end
+        if (fget(postosprbot(botcorners[i][1], botcorners[i][2]), 1)) then
+            resetlevel()
+        end
+    end
 end
 
 
 function checkexit()
-   if fget(postosprtop(topplayer.x + 4, topplayer.y + 4),2) then
-       if fget(postosprbot(botplayer.x + 4, botplayer.y + 4),2) then
-           level.x += 15
-           if (level.x >= 120) then
-               level.x -= 120
-               level.y += 15
-           end
-           resetlevel()
-       end
-   end
+    if fget(postosprtop(topplayer.x + 4, topplayer.y + 4),2) then
+        if fget(postosprbot(botplayer.x + 4, botplayer.y + 4),2) then
+            level.levelnum+=1
+            level.x += 15
+            if (level.x >= 120) then
+                level.x -= 120
+                level.y += 15
+            end
+            resetlevel()
+        end
+    end
+end
+
+function drawtext(text)
+    y = 8
+    for i=1,#text[1] do
+        centertext(text[1][i], y, 8)
+        y+=6
+    end
+    y = 110
+    for i=#text[2],1,-1 do
+        centertext(text[2][i], y, 8)
+        y-=6
+    end
+
 end
 
 function _update()
     if (level.state == "m") then
         if(btn(5)) then
             level.state = "g"
+            level.x=0
+            level.y=0
+            level.levelnum=1
+            level.linked=false
         end
     elseif (level.state == "g") then
         checkspikes()
@@ -259,7 +298,6 @@ function _draw()
         print("tHE", 58, 20, 3)
         print("oNE", 58, 30, 3)
 
-
         print("press x to start", 32, 100, 3)
     elseif (level.state == "g") then
         --draw base color
@@ -273,6 +311,10 @@ function _draw()
 
         --draw map
         map(level.x,level.y,4,4,15,15)
+
+        --draw text
+        drawtext(leveldialog[level.levelnum])
+
 
         --draw players
         if (btn(0) and not btn(1)) then
@@ -324,10 +366,10 @@ function _draw()
             spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, true, true)
         end
 
-        print("bot y :", 0, 0, 14)
-        print(botplayer.y, 30, 0)
-        print("top y :", 0, 8, 14)
-        print(topplayer.y, 30, 8)
+        -- print("bot y :", 0, 0, 14)
+        -- print(botplayer.y, 30, 0)
+        -- print("top y :", 0, 8, 14)
+        -- print(topplayer.y, 30, 8)
     end
 
 end
