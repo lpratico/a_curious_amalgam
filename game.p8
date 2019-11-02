@@ -30,15 +30,16 @@ level={
     linked=false
 }
 
+
 function postospr(x,y)
     return mget(level.x + x/8, level.y + y/8)
 end
 
 function getcorners(player) 
-    return {{player.x + 2,   player.y + 2},
-            {player.x + 5,   player.y + 2},
-            {player.x + 2,   player.y + 7},
-            {player.x + 5,   player.y + 7}}
+    return {{player.x + 2,   ceil(player.y + 2)},
+            {player.x + 5,   ceil(player.y + 2)},
+            {player.x + 2,   ceil(player.y + 7)},
+            {player.x + 5,   ceil(player.y + 7)}}
 end
 
 function validlocation(x, y)
@@ -84,46 +85,52 @@ function moveplayersy()
     botcorners = getcorners(botplayer)
     topplayer.y -= topplayer.v
     botplayer.y -= botplayer.v
-    fracttop = 1
+    disttop = topplayer.v
+    distbot = botplayer.v
 
-    fractbot = 1
     for i = 1,4 do
         if (not validlocation(topcorners[i][1], topcorners[i][2])) then
             if (topplayer.v < 0) then --upward
-                edge = flr(topcorners[i][2]/8)*8 + 7
-                fracttop = min(fracttop, topplayer.v/(edge-topcorners[i][2]-topplayer.v))
+                edge = flr(topcorners[i][2]/8)*8 + 8
+                disttop = edge-topcorners[i][2]+topplayer.v
+                
             else --downward
                 edge = flr(topcorners[i][2]/8)*8
-                fracttop = min(fracttop, topplayer.v/(edge-topcorners[i][2]-topplayer.v))
+                topplayer.y = edge - 8
+                disttop = 0
             end
         end
         if (not validlocation(botcorners[i][1], mapheight - botcorners[i][2])) then
             if (botplayer.v < 0) then --upward
-                edge = flr(botcorners[i][2]/8)*8 + 7
-                fractbot = min(fracttop, botplayer.v/(edge-botcorners[i][2]-botplayer.v))
-            else --downward
+                edge = flr(botcorners[i][2]/8)*8 + 8
+                disttop = edge-botcorners[i][2]+botplayer.v
+            elseif (botplayer.v>0) then --downward
                 edge = flr(botcorners[i][2]/8)*8
-                fractbot = min(fractbot, botplayer.v/(edge-botcorners[i][2]-botplayer.v))
+                botplayer.y = edge - 7
+                distbot = 0
             end
         end
     end
 
     if(level.linked) then
-        fracttop = min(fractbot, fracttop)
-        fractbot = fracttop
+        disttop = min(distbot, disttop)
+        distbot = disttop
     end
 
-    topplayer.y += topplayer.v * fracttop
-    botplayer.y += botplayer.v * fractbot
+    if (disttop == topplayer.v) then
+        topplayer.y += disttop
+    end
+    if (distbot == botplayer.v) then
+        botplayer.y += distbot
+    end
 
-
-    if (fracttop < 1) then
+    if (disttop < topplayer.v) then
         topplayer.v = 0
-        topplayer.y = ceil(topplayer.y)
+        -- topplayer.y = ceil(topplayer.y)
     end
-    if (fractbot < 1) then
+    if (distbot < botplayer.v) then
         botplayer.v = 0
-        botplayer.y = ceil(botplayer.y)
+        -- botplayer.y = ceil(botplayer.y)
     end
 end
 
@@ -167,6 +174,7 @@ function checkexit()
 end
 
 function _update()
+    btntimer-=1
     checkspikes()
     checkexit()
     
@@ -222,6 +230,13 @@ function _draw()
     --draw players
     spr(1, topplayer.x + 4, topplayer.y + 4) 
     spr(2, botplayer.x + 4, mapheight - botplayer.y - 3, 1, 1, false, true)
+
+    print("bot y :", 0, 0, 14)
+    print(botplayer.y, 30, 0)
+    print("top y :", 0, 8, 14)
+    print(topplayer.y, 30, 8)
+
+
 end
 __gfx__
 0000000000000000000bbb007777777766666666999999993333333111111a117777777777777777777777777777777777777777777777775555555500000000
