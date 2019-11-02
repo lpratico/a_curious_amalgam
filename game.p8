@@ -4,9 +4,6 @@ __lua__
 
 --constants
 
-exitsprite = 6
-spikesprite = 7
-
 playerheight = 7
 mapheight = 120 --119?
 
