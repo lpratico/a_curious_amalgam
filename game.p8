@@ -45,6 +45,11 @@ level={
     state="m"
 }
 
+carrot = {
+    x = 30,
+    y = 45
+}
+
 
 function postosprtop(x,y)
     return mget(level.x + flr(x/8), level.y + flr(y/8))
@@ -203,18 +208,59 @@ function checkexit()
    end
 end
 
+
+function movecarrot()
+
+    --table for menu
+    t = {carrot.y, carrot.y+5, carrot.y+10}
+
+    --move carrot down
+    if(btn(3)) then
+        
+        
+    end
+    
+end
+
 function _update()
     if (level.state == "m") then
         if(btn(5)) then
             level.state = "g"
         end
+
+    elseif (level.state == "p") then
+        --resume game
+        if (btnp(4)) then
+            level.state = "g"
+        end
+
+        
+
+        --move carrot down 
+        if (btn(3)) then
+            movecarrot()
+        end
+
+        -- --move carrot up 
+        -- if (btn(2)) then
+        --     movecarrot()
+        -- end
+
+        --reset game
+        if (btn(5)) then
+            level.state = "g"
+            resetlevel()
+        end
+
+
+
     elseif (level.state == "g") then
         checkspikes()
         checkexit()
         
-        --reset button
+        --pause menu
         if (btnp(4)) then
-            resetlevel()
+            level.state = "p"
         end
 
 
@@ -261,6 +307,22 @@ function _draw()
 
 
         print("press x to start", 32, 100, 3)
+
+    elseif (level.state == "p") then 
+        rectfill(15,15,112,112,0)
+        rect(15,15,112,112,7)
+
+        print("pause",58,30,7)
+
+        print(">", carrot.x , carrot.y, 7 )
+
+        print("reset", 40, 45, 7)
+        print("menu", 40, 55, 7)
+        print("continue", 40, 65, 7)
+
+               
+        
+
     elseif (level.state == "g") then
         --draw base color
         if (level.linked) then
