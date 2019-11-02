@@ -106,49 +106,50 @@ function moveplayersy()
         if (not validlocation(topcorners[i][1], topcorners[i][2], false)) then
             if (topplayer.v < 0) then --upward
                 edge = flr(topcorners[i][2] / 8) * 8
-                topplayer.y = edge + playerheight
-                disttop = 0
+                disttop = edge + playerheight - topplayer.y 
+                -- topplayer.y = edge + playerheight
                 
             else --downward
                 edge = flr(topcorners[i][2] / 8) * 8 - 8
                 disttop = edge - topplayer.y
-                topplayer.y = edge
+                -- topplayer.y = edge
             end
         end
         if (not validlocation(botcorners[i][1], botcorners[i][2], true)) then
             if (botplayer.v < 0) then --upward
                 edge = flr(botcorners[i][2] / 8) * 8
-                botplayer.y = edge + playerheight
-                distbot = 0
+                distbot = edge + playerheight - botplayer.y 
+                -- botplayer.y = edge + playerheight
 
             else --downward
                 edge = flr(botcorners[i][2] / 8) * 8 - 8
                 distbot = edge - botplayer.y
-                botplayer.y = edge
+                -- botplayer.y = edge
             end
         end
     end
 
     if(level.linked) then
-        disttop = min(distbot, disttop)
-        distbot = disttop
+        if (abs(disttop) < abs(distbot)) then
+
+            distbot = disttop
+        else
+            disttop = distbot
+        end
     end
 
-    if (disttop == topplayer.v) then
-        topplayer.y += disttop
-    end
-    if (distbot == botplayer.v) then
-        botplayer.y += distbot
-    end
+    topplayer.y += disttop
+    botplayer.y += distbot
 
-    if (disttop < topplayer.v) then
+
+    if (disttop < topplayer.v) then --hit ground
         topplayer.v = 0
-    elseif (disttop > topplayer.v) then
+    elseif (disttop > topplayer.v) then --bounce off of ceiling
         topplayer.v = .1
     end
-    if (distbot < botplayer.v) then
+    if (distbot < botplayer.v) then --hit ground
         botplayer.v = 0
-    elseif (distbot > botplayer.v) then
+    elseif (distbot > botplayer.v) then --bounce oof of ceiling
         botplayer.v = .1
     end
 end
@@ -166,30 +167,30 @@ function resetlevel()
 end
 
 function checkspikes()
-    topcorners = getcorners(topplayer)
-    botcorners = getcorners(botplayer)
-    for i = 1,4 do
-        if (postosprtop(topcorners[i][1], topcorners[i][2]) == spikesprite) then
-            resetlevel()
-        end
-        if (postosprbot(botcorners[i][1], botcorners[i][2]) == spikesprite) then
-            resetlevel()
-        end
-    end
+   topcorners = getcorners(topplayer)
+   botcorners = getcorners(botplayer)
+   for i = 1,4 do
+       if (fget(postosprtop(topcorners[i][1], topcorners[i][2]), 1)) then
+           resetlevel()
+       end
+       if (fget(postosprbot(botcorners[i][1], botcorners[i][2]), 1)) then
+           resetlevel()
+       end
+   end
 end
 
 
 function checkexit()
-    if (postosprtop(topplayer.x + 4, topplayer.y + 4) == exitsprite) then
-        if (postosprbot(botplayer.x + 4, botplayer.y + 4) == exitsprite) then
-            level.x += 15
-            if (level.x >= 120) then
-                level.x -= 120
-                level.y += 15
-            end
-            resetlevel()
-        end
-    end
+   if fget(postosprtop(topplayer.x + 4, topplayer.y + 4),2) then
+       if fget(postosprbot(botplayer.x + 4, botplayer.y + 4),2) then
+           level.x += 15
+           if (level.x >= 120) then
+               level.x -= 120
+               level.y += 15
+           end
+           resetlevel()
+       end
+   end
 end
 
 function _update()
@@ -318,7 +319,7 @@ __gfx__
 0000000000000000cccccccccccccccc00000000000000000000000000000000000000000000000000000000ccc6cccccccc6ccc000000000000000000000000
 0000000000000000cccccccccccccccc00000000000000000000000000000000000000000000000000000000ccc6cccccccc6ccc000000000000000000000000
 __gff__
-0000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000010402000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0500000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000
