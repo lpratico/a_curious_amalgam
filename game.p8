@@ -3,10 +3,11 @@ version 18
 __lua__
 
 --constants
-solidsprite = 5
+
 exitsprite = 6
 spikesprite = 7
 
+playerheight = 7
 mapheight = 120 --119?
 
 jumpvel = -2.21
@@ -31,29 +32,42 @@ level={
 }
 
 
-function postospr(x,y)
-    return mget(level.x + x/8, level.y + y/8)
+function postosprtop(x,y)
+    return mget(level.x + flr(x/8), level.y + flr(y/8))
+end
+
+function postosprbot(x,y)
+    return mget(level.x + flr(x/8), level.y + 14 - flr(y/8))
 end
 
 function getcorners(player) 
-    return {{player.x + 2,   ceil(player.y + 2)},
-            {player.x + 5,   ceil(player.y + 2)},
+    return {{player.x + 2,   flr(player.y + 2)},
+            {player.x + 5,   flr(player.y + 2)},
             {player.x + 2,   ceil(player.y + 7)},
             {player.x + 5,   ceil(player.y + 7)}}
 end
 
-function validlocation(x, y)
+function validlocation(x, y, isbot)
     if(x < 0 or x >= mapheight) then
         return false
     end
     if (y < 0 or y >= mapheight) then
         return false
     end
-    if (postospr(x,y) == solidsprite) then
-        return false
+    if (isbot) then 
+        solidsprite = fget(postosprbot(x,y),0)
+        if (solidsprite) then
+            return false
+        end
+    else
+        solidsprite = fget(postosprtop(x,y),0)
+        if (solidsprite) then
+            return false
+        end
     end
     return true
 end
+
 
 function moveplayersx(x)
     validtop = true
@@ -63,10 +77,10 @@ function moveplayersx(x)
     topcorners = getcorners(topplayer)
     botcorners = getcorners(botplayer)
     for i = 1,4 do
-        if (not validlocation(topcorners[i][1], topcorners[i][2])) then
+        if (not validlocation(topcorners[i][1], topcorners[i][2], false)) then
             validtop = false
         end
-        if (not validlocation(botcorners[i][1], mapheight - botcorners[i][2])) then
+        if (not validlocation(botcorners[i][1], botcorners[i][2], true)) then
             validbot = false
         end
     end
@@ -89,25 +103,28 @@ function moveplayersy()
     distbot = botplayer.v
 
     for i = 1,4 do
-        if (not validlocation(topcorners[i][1], topcorners[i][2])) then
+        if (not validlocation(topcorners[i][1], topcorners[i][2], false)) then
             if (topplayer.v < 0) then --upward
-                edge = flr(topcorners[i][2]/8)*8 + 8
-                disttop = edge-topcorners[i][2]+topplayer.v
+                edge = flr(topcorners[i][2] / 8) * 8
+                topplayer.y = edge + playerheight
+                disttop = 0
                 
             else --downward
-                edge = flr(topcorners[i][2]/8)*8
-                topplayer.y = edge - 8
-                disttop = 0
+                edge = flr(topcorners[i][2] / 8) * 8 - 8
+                disttop = edge - topplayer.y
+                topplayer.y = edge
             end
         end
-        if (not validlocation(botcorners[i][1], mapheight - botcorners[i][2])) then
+        if (not validlocation(botcorners[i][1], botcorners[i][2], true)) then
             if (botplayer.v < 0) then --upward
-                edge = flr(botcorners[i][2]/8)*8 + 8
-                disttop = edge-botcorners[i][2]+botplayer.v
-            elseif (botplayer.v>0) then --downward
-                edge = flr(botcorners[i][2]/8)*8
-                botplayer.y = edge - 7
+                edge = flr(botcorners[i][2] / 8) * 8
+                botplayer.y = edge + playerheight
                 distbot = 0
+
+            else --downward
+                edge = flr(botcorners[i][2] / 8) * 8 - 8
+                distbot = edge - botplayer.y
+                botplayer.y = edge
             end
         end
     end
@@ -126,11 +143,13 @@ function moveplayersy()
 
     if (disttop < topplayer.v) then
         topplayer.v = 0
-        -- topplayer.y = ceil(topplayer.y)
+    elseif (disttop > topplayer.v) then
+        topplayer.v = .1
     end
     if (distbot < botplayer.v) then
         botplayer.v = 0
-        -- botplayer.y = ceil(botplayer.y)
+    elseif (distbot > botplayer.v) then
+        botplayer.v = .1
     end
 end
 
@@ -150,10 +169,10 @@ function checkspikes()
     topcorners = getcorners(topplayer)
     botcorners = getcorners(botplayer)
     for i = 1,4 do
-        if (postospr(topcorners[i][1], topcorners[i][2]) == spikesprite) then
+        if (postosprtop(topcorners[i][1], topcorners[i][2]) == spikesprite) then
             resetlevel()
         end
-        if (postospr(botcorners[i][1], mapheight - botcorners[i][2]) == spikesprite) then
+        if (postosprbot(botcorners[i][1], botcorners[i][2]) == spikesprite) then
             resetlevel()
         end
     end
@@ -161,8 +180,8 @@ end
 
 
 function checkexit()
-    if (postospr(topplayer.x + 4, topplayer.y + 4) == exitsprite) then
-        if (postospr(botplayer.x + 4, mapheight - (botplayer.y + 4)) == exitsprite) then
+    if (postosprtop(topplayer.x + 4, topplayer.y + 4) == exitsprite) then
+        if (postosprbot(botplayer.x + 4, botplayer.y + 4) == exitsprite) then
             level.x += 15
             if (level.x >= 120) then
                 level.x -= 120
@@ -194,13 +213,6 @@ function _update()
     end
 
 
-    --gravity
-    topplayer.v += gravity
-    botplayer.v += gravity
-
-    moveplayersy()
-
-
     --controls
     if(btn(0)) then
         moveplayersx(-1)
@@ -208,9 +220,20 @@ function _update()
     if(btn(1)) then
         moveplayersx(1)
     end
+
     if (btnp(4)) then
         level.linked = not level.linked
+        if (level.linked) then
+            topplayer.v = (topplayer.v + botplayer.v)/2
+            botplayer.v = topplayer.v
+        end
     end
+
+    --gravity
+    topplayer.v += gravity
+    botplayer.v += gravity
+
+    moveplayersy()
 end
 
 function _draw()
@@ -228,7 +251,7 @@ function _draw()
 
     --draw players
     spr(1, topplayer.x + 4, topplayer.y + 4) 
-    spr(2, botplayer.x + 4, mapheight - botplayer.y - 3, 1, 1, false, true)
+    spr(2, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, false, true)
 
     print("bot y :", 0, 0, 14)
     print(botplayer.y, 30, 0)
@@ -294,6 +317,9 @@ __gfx__
 0000000000000000cc7777cccc7777cc00000000000000000000000000000000000000000000000000000000cc6666cccc6666cc000000000000000000000000
 0000000000000000cccccccccccccccc00000000000000000000000000000000000000000000000000000000ccc6cccccccc6ccc000000000000000000000000
 0000000000000000cccccccccccccccc00000000000000000000000000000000000000000000000000000000ccc6cccccccc6ccc000000000000000000000000
+__gff__
+0000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0500000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000000000000000000000000
