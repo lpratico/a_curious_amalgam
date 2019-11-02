@@ -15,13 +15,13 @@ leveldialog={
     {{"press the arrow keys to move"},{"i wonder whats behind","these doors..."}},
     {{"fire... curious"},{"press up to jump"}},
     {{"press z to reset"}, {"sometimes it's best","to start over"}},
-    {{"i might need a little help this time"},{"press x to link"}},
+    {{"i might need a little","help this time"},{"press x to link"}},
     {{"x to unlink"},{"maybe linking isn't", "always helpful..."}},
     {{},{"sometimes i feel like","there's someone out", "there for me"}},
     {{"i wonder what it feels like", "to have a connection", "with someone..."},{}},
     {{"now that i think about it,", "sometimes i do feel","like i'm connected"},{}},
     {{},{"perhaps if i just go", "through the doors", "i'll find the one"}},
-    {{"theres no doubt now,","i have a connection with someone","across time and space!"},{}},
+    {{"theres no doubt now,","i have a connection", "with someone across", "time and space!"},{}},
     {{},{"i almost can't believe it:","with every door i go through,","i'm getting closer to love!"}},
     {{"i have to know:","who is this person?","who shares this cosmic","bond with me?"},{}},
     {{},{"i can feel our energies","intertwining, our bond", "must be getting stronger"}},
@@ -29,13 +29,29 @@ leveldialog={
     {{},{"sometimes i feel like","i run into a wall.", "is this what falling in love","feels like?"}},
     {{"we're getting close,", "i can sense it..."},{}},
     {{},{"the anticipation is so intense","i can hardly bear it!"}},
-    {{},{}},
+    {{"it's you!"},{"i knew i'd find you!"}},
 }
 
+credits = {
+    "credits",
+    "",
+    "artists",
+    "-------",
+    "jessica hofmeister",
+    "caitlin gaff",
+    "",
+    "developers",
+    "----------",
+    "benjamin ryker",
+    "lily pratico",
+    "",
+    "thank you for playing"
+}
 
 spritetop = 1
 spritebot = 1
 menuitem = 1
+
 
 spriteids = {
     {25, 31, 37, 43}, --females
@@ -249,6 +265,14 @@ function checkexit()
     end
 end
 
+function checkending()
+    if fget(postosprtop(topplayer.x + 4, topplayer.y + 4),3) then
+        if fget(postosprbot(botplayer.x + 4, botplayer.y + 4),3) then
+            level.state = "f"
+        end
+    end
+end
+
 function drawtext(text)
     y = 8
     for i=1,#text[2] do
@@ -280,13 +304,77 @@ function movecarrotup()
     end 
 end
 
+function drawcharacters()
+    --draw players
+    if (btn(0) and not btn(1)) then
+        topplayer.spritedir = -1
+        botplayer.spritedir = -1
+    elseif (btn(1) and not btn(0)) then
+        topplayer.spritedir = 1
+        botplayer.spritedir = 1
+    end
+    if (topplayer.v != 0) then
+        topplayer.spritecurrent = topplayer.spritejump
+    elseif (btn(0) and not btn(1)) then
+        topplayer.framenum +=1
+        topplayer.framenum %= 20
+        topplayer.spritecurrent = topplayer.spriterun + flr(topplayer.framenum/5)
+    elseif (btn(1) and not btn(0)) then
+        topplayer.framenum +=1
+        topplayer.framenum %= 20
+        topplayer.spritecurrent = topplayer.spriterun  + flr(topplayer.framenum/5)
+    else
+        topplayer.spritecurrent = topplayer.spritestand
+        topplayer.framenum = 0
+    end
+
+    if (botplayer.v != 0) then
+        botplayer.spritecurrent = botplayer.spritejump
+    elseif (btn(0) and not btn(1)) then
+        botplayer.framenum +=1
+        botplayer.framenum %= 20
+        botplayer.spritecurrent = botplayer.spriterun + flr(botplayer.framenum/5)
+    elseif (btn(1) and not btn(0)) then
+        botplayer.framenum +=1
+        botplayer.framenum %= 20
+        botplayer.spritecurrent = botplayer.spriterun  + flr(botplayer.framenum/5)
+    else
+        botplayer.spritecurrent = botplayer.spritestand
+        botplayer.framenum = 0
+    end
+
+    if (topplayer.spritedir == 1) then
+        spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, false, false) 
+    else
+        spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, true, false) 
+    end
+
+    if (botplayer.spritedir == 1) then
+        spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, false, true)
+    else
+        spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, true, true)
+    end
+end
+
 
 function _update()
-    if (level.state == "m") then
+    if(level.state == "f") then --end credits
+        if (btnp(5)) then
+            level.state = "h"
+        end
+    elseif(level.state == "h") then --end credits
+        if (btnp(5)) then
+            level.state = "e"
+        end
+    elseif(level.state == "e") then --end credits
+        if (btnp(5)) then
+            level.state = "m"
+        end
+    elseif (level.state == "m") then --main menu
         if (btnp(5)) then
             level.state = "c"
         end
-    elseif (level.state == "c") then
+    elseif (level.state == "c") then --character selection
         if(btnp(5)) then
             level.state = "g"
             level.x=0
@@ -357,7 +445,7 @@ function _update()
             end
         end
 
-    elseif (level.state == "p") then
+    elseif (level.state == "p") then --pause menu
         
 
         --resume game
@@ -388,10 +476,11 @@ function _update()
 
     
 
-    elseif (level.state == "g") then
+    elseif (level.state == "g") then --game loop
         checkspikes()
         checkexit()
-        
+        checkending()
+
         --pause menu
         if (btnp(4)) then
             level.state = "p"
@@ -434,7 +523,47 @@ function _update()
 end
 
 function _draw()
-    if (level.state == "m") then --main menu
+    if (level.state == "f") then --last text
+        if (level.linked) then
+            rectfill(0,0,127,127,7)
+        else
+            rectfill(0,0,127,127,5)
+        end
+        rectfill(4,4,123,123,1)
+
+
+        --draw map
+        map(level.x,level.y,4,4,15,15)
+
+        --draw last text
+        drawtext(leveldialog[#leveldialog])
+        
+
+        if (topplayer.spritedir == 1) then
+            spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, false, false) 
+        else
+            spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, true, false) 
+        end
+
+        if (botplayer.spritedir == 1) then
+            spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, false, true)
+        else
+            spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, true, true)
+        end
+        
+    elseif(level.state == "h") then --end credits
+        rectfill(0,0,127,127, 1)
+        centertext("and they lived", 20, 7)
+        centertext("happily ever after", 28, 7)
+        centertext("the end", 50, 7)
+    elseif(level.state == "e") then --end credits
+        rectfill(0,0,127,127, 1)
+        y = 20
+        for i=1,#credits do
+            centertext(credits[i], y, 7)
+            y+=7
+        end
+    elseif (level.state == "m") then --main menu
         rectfill(0,0,127,127,0)
         print("tHE", 58, 20, 3)
         print("oNE", 58, 30, 3)
@@ -492,62 +621,7 @@ function _draw()
         drawtext(leveldialog[level.levelnum])
 
 
-        --draw players
-        if (btn(0) and not btn(1)) then
-            topplayer.spritedir = -1
-            botplayer.spritedir = -1
-        elseif (btn(1) and not btn(0)) then
-            topplayer.spritedir = 1
-            botplayer.spritedir = -1
-        end
-        if (topplayer.v != 0) then
-            topplayer.spritecurrent = topplayer.spritejump
-        elseif (btn(0) and not btn(1)) then
-            topplayer.framenum +=1
-            topplayer.framenum %= 20
-            topplayer.spritecurrent = topplayer.spriterun + flr(topplayer.framenum/5)
-        elseif (btn(1) and not btn(0)) then
-            topplayer.framenum +=1
-            topplayer.framenum %= 20
-            topplayer.spritecurrent = topplayer.spriterun  + flr(topplayer.framenum/5)
-        else
-            topplayer.spritecurrent = topplayer.spritestand
-            topplayer.framenum = 0
-        end
-
-        if (botplayer.v != 0) then
-            botplayer.spritecurrent = botplayer.spritejump
-        elseif (btn(0) and not btn(1)) then
-            botplayer.framenum +=1
-            botplayer.framenum %= 20
-            botplayer.spritecurrent = botplayer.spriterun + flr(botplayer.framenum/5)
-        elseif (btn(1) and not btn(0)) then
-            botplayer.framenum +=1
-            botplayer.framenum %= 20
-            botplayer.spritecurrent = botplayer.spriterun  + flr(botplayer.framenum/5)
-        else
-            botplayer.spritecurrent = botplayer.spritestand
-            botplayer.framenum = 0
-        end
-
-        if (topplayer.spritedir == 1) then
-            spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, false, false) 
-        else
-            spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, true, false) 
-        end
-
-        if (topplayer.spritedir == 1) then
-            spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, false, true)
-        else
-            spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, true, true)
-        end
-
-        -- print("bot y :", 0, 0, 14)
-        -- print(botplayer.y, 30, 0)
-        -- print("top y :", 0, 8, 14)
-        -- print(topplayer.y, 30, 8)
-       
-        
+        drawcharacters()
     end
 
 end
@@ -617,7 +691,7 @@ c7777ccc1cccccccccccccc1ccc777cc999999999999999999777799997777994999999949999999
 60000336600000366333333660333336600333366000033660000036000000000000000000000000000000000000000000000000000000000000000000000000
 60000336600000366666666666666666666666666666666666666666000000000000000000000000000000000000000000000000000000000000000000000000
 __gff__
-0000000000010402000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000101010102040201010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101
+0000000000010402000000000000000000000000000000000000000000000000000000000000000000000000000000000008080000000000000000000000000000000101010102040201010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101
 0101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010101010000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 __map__
 0500000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000000000000000050000000000000000
@@ -626,9 +700,9 @@ __map__
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000470000000000000000000000000000000000000000000000000000000000470000000000000000560000000000000000000000000000000000000000000000565600000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000005500005555000055555555550000005500000000005500000000000000000000005555555555555555550000000000005600000000000000000000000055000000000000000000000000565600000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000555500000000000055555555550000555500000000005555000000000000000000005555555555555555550000000056000000000000000000000000000000005500000000000000000000565600000000000000000000000000000000000000
-0000000000000000000000000000470000000000460000000000000000470055555500000000000055555555550055555500000000005555550000470000000000005555555555555555550000560000000000000000000000000000000000550000000000000000470000000000000000000000000000470000000000000000
+0000000000000000310000000000470000000000460000000000000000470055555500000000000055555555550055555500000000005555550000470000000000005555555555555555550000560000000000000000000000000000000000550000000000000000470000000000000000000000000000470000000000000000
 5555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555555550000000000000000
-0000000000000000000000000000470000000000480000000000000000470055555500000000000055555555550000000055555555550000000000470000000000005555555555555555550000560000000000000000000000000000000000550000000000000000470000000000004848484848000000470000000000000000
+0000000000000000320000000000470000000000480000000000000000470055555500000000000055555555550000000055555555550000000000470000000000005555555555555555550000560000000000000000000000000000000000550000000000000000470000000000004848484848000000470000000000000000
 0000000000000000000000000000000000000000000000000000000000000000555500000000000055555555550000000055555555550000000000000000000000000055555555555555550000000056000000000000000000000000000000550000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000005500005555000055555555550000000055555555550000000000000000000000000000555555555555550000000000005600000000000000000000000000550000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000470000000000000000000000000000000000000000000000000000000000470000000000000000560000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
