@@ -252,12 +252,12 @@ end
 function drawtext(text)
     y = 8
     for i=1,#text[2] do
-        centertext(text[2][i], y, 8)
+        centertext(text[2][i], y, 7)
         y+=6
     end
     y = 110
     for i=#text[1],1,-1 do
-        centertext(text[1][i], y, 8)
+        centertext(text[1][i], y, 7)
         y-=6
     end
 
@@ -283,13 +283,10 @@ end
 
 function _update()
     if (level.state == "m") then
-<<<<<<< HEAD
-=======
         if (btnp(5)) then
             level.state = "c"
         end
     elseif (level.state == "c") then
->>>>>>> 3ba15aa64abd6871a38fcc9dacabf5cfb28b0680
         if(btnp(5)) then
             level.state = "g"
             level.x=0
@@ -300,10 +297,16 @@ function _update()
             topplayer.spritejump = topplayer.spritestand + 1
             topplayer.spriterun = topplayer.spritestand + 2
             topplayer.spritecurrent = topplayer.spritestand
+            topplayer.x = 0
+            topplayer.y = 48
+            topplayer.v = 0
             botplayer.spritestand = spriteids[2][spritebot]
             botplayer.spritejump = botplayer.spritestand + 1
             botplayer.spriterun = botplayer.spritestand + 2
             botplayer.spritecurrent = botplayer.spritestand
+            botplayer.x = 0
+            botplayer.y = 48
+            botplayer.v = 0
 
         end
         if (btnp(2)) then
@@ -446,13 +449,11 @@ function _draw()
         
         print(">", 30, carrott[carroti[i]], 7 )
 
-        print("i = ",16, 16, 14 )
-        print(i,30, 16)
-
         print("reset", 40, 45, 7)
         print("menu", 40, 55, 7)
         print("continue", 40, 65, 7)
 
+        centertext("press x to select", 85, 7)
                
         
     elseif (level.state == "c") then --character selection
@@ -477,11 +478,11 @@ function _draw()
     elseif (level.state == "g") then --game loop
         --draw base color
         if (level.linked) then
-            rectfill(0,0,127,127,11)
-        else
             rectfill(0,0,127,127,7)
+        else
+            rectfill(0,0,127,127,5)
         end
-        rectfill(4,4,123,123,0)
+        rectfill(4,4,123,123,1)
 
 
         --draw map
