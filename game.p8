@@ -133,6 +133,7 @@ end
 function checkexit()
     if (postospr(topplayer.x+4, topplayer.y + 4) == exitsprite) then
         if (postospr(botplayer.x+4, botplayer.y + 4) == exitsprite) then
+            level.x += 15
             resetlevel()
         end
     end
