@@ -174,7 +174,6 @@ function checkexit()
 end
 
 function _update()
-    btntimer-=1
     checkspikes()
     checkexit()
     
