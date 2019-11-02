@@ -61,11 +61,9 @@ level={
     linked=false,
     state="m"
 }
-
-carrot = {
-    x = 30,
-    y = 45
-}
+i = 1
+carrott = {45, 55, 65}
+carroti = {1,2,3}
 
 function centertext(text, y, color)
     print(text, 64-#text*2, y, color)
@@ -244,22 +242,26 @@ function drawtext(text)
 end
 
 
-function movecarrot()
-
-    --table for menu
-    t = {carrot.y, carrot.y+5, carrot.y+10}
-
-    --move carrot down
-    if(btn(3)) then
-        
-        
-    end
-    
+function movecarrotdown()
+   i += 1
+   i %= 3
+   if (i == 0) then
+        i = 3
+   end 
 end
+
+function movecarrotup()
+    i -= 1
+    i %= 3
+    if (i == 0) then
+        i = 3
+    end 
+end
+
 
 function _update()
     if (level.state == "m") then
-        if(btn(5)) then
+        if(btnp(5)) then
             level.state = "g"
             level.x=0
             level.y=0
@@ -268,30 +270,35 @@ function _update()
         end
 
     elseif (level.state == "p") then
+        
+
         --resume game
         if (btnp(4)) then
             level.state = "g"
         end
 
-        
-
         --move carrot down 
-        if (btn(3)) then
-            movecarrot()
+        if (btnp(3)) then
+            movecarrotdown()
         end
 
-        -- --move carrot up 
-        -- if (btn(2)) then
-        --     movecarrot()
-        -- end
-
-        --reset game
-        if (btn(5)) then
-            level.state = "g"
-            resetlevel()
+        --move carrot up 
+        if (btnp(2)) then
+            movecarrotup()
         end
 
+        if (btn(5))then 
+            if (i == 1) then 
+                resetlevel()
+                level.state = "g"
+            elseif (i == 2) then 
+                level.state = "m"
+            elseif (i == 3) then
+                level.state = "g"
+            end
+        end
 
+    
 
     elseif (level.state == "g") then
         checkspikes()
@@ -351,8 +358,11 @@ function _draw()
         rect(15,15,112,112,7)
 
         print("pause",58,30,7)
+        
+        print(">", 30, carrott[carroti[i]], 7 )
 
-        print(">", carrot.x , carrot.y, 7 )
+        print("i = ",16, 16, 14 )
+        print(i,30, 16)
 
         print("reset", 40, 45, 7)
         print("menu", 40, 55, 7)
@@ -432,6 +442,8 @@ function _draw()
         -- print(botplayer.y, 30, 0)
         -- print("top y :", 0, 8, 14)
         -- print(topplayer.y, 30, 8)
+       
+        
     end
 
 end
