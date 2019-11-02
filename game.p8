@@ -7,6 +7,7 @@ solidsprite = 5
 exitsprite = 6
 spikesprite = 7
 
+
 jumpvel = -2.21
 gravity = .15
 
@@ -38,7 +39,7 @@ end
 function getcorners(player) 
     return {{player.x,                  player.y},
             {player.x + spritewidth,    player.y},
-            {player.x,                  player.y + spriteheight - 1 },
+            {player.x,                  player.y + spriteheight - 1},
             {player.x + spritewidth,    player.y + spriteheight - 1}}
 end
 
@@ -137,6 +138,10 @@ function checkexit()
     if (postospr(topplayer.x+4, topplayer.y + 4) == exitsprite) then
         if (postospr(botplayer.x+4, botplayer.y + 4) == exitsprite) then
             level.x += 15
+            if (level.x >= 120) then
+                level.x -= 120
+                level.y += 15
+            end
             resetlevel()
         end
     end
