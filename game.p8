@@ -2,6 +2,14 @@ pico-8 cartridge // http://www.pico-8.com
 version 18
 __lua__
 
+--constants
+solidsprite = 5
+exitsprite = 6
+spikesprite = 7
+
+jumpvel = -2.21
+gravity = .15
+
 topplayer={
     x=0,
     y=48,
@@ -38,7 +46,7 @@ function validlocation(x, y)
     if (y < 0 or y >= 120) then
         return false
     end
-    if (postospr(x,y) == 5) then
+    if (postospr(x,y) == solidsprite) then
         return false
     end
     return true
@@ -95,11 +103,53 @@ function moveplayersy()
     end
 end
 
-function _update()
-    --jump
+function resetlevel()
+    topplayer.x = 0
+    topplayer.y = 48
+    topplayer.v = 0
+    botplayer.x = 0
+    botplayer.y = 64
+    botplayer.v = 0
+
+    level.linked = false
     
-    jumpvel = -2.21
-    gravity = .15
+end
+
+function checkspikes()
+    topcorners = getcorners(topplayer)
+    botcorners = getcorners(botplayer)
+    for i = 1,4 do
+        if (postospr(topcorners[i][1], topcorners[i][2]) == spikesprite) then
+            resetlevel()
+        end
+        if (postospr(botcorners[i][1], botcorners[i][2]) == spikesprite) then
+            resetlevel()
+        end
+    end
+end
+
+
+--todo: switch to next map
+function checkexit()
+    if (postospr(topplayer.x+4, topplayer.y + 4) == exitsprite) then
+        if (postospr(botplayer.x+4, botplayer.y + 4) == exitsprite) then
+            level.x += 15
+            resetlevel()
+        end
+    end
+end
+
+function _update()
+    checkspikes()
+    checkexit()
+    
+    --reset button
+    if (btnp(5)) then
+        resetlevel()
+    end
+
+
+    --jump
     if (btn(2)) then
         if (topplayer.v == 0) then
             topplayer.v = jumpvel
@@ -108,12 +158,16 @@ function _update()
             botplayer.v = jumpvel
         end
     end
+
+
     --gravity
     topplayer.v += gravity
     botplayer.v += gravity
 
     moveplayersy()
 
+
+    --controls
     if(btn(0)) then
         moveplayersx(-1)
     end
@@ -123,14 +177,6 @@ function _update()
     if (btnp(4)) then
         level.linked = not level.linked
     end
-    -- if(btn(2)) then
-    --     
-    -- end
-    -- if(btn(3)) then
-    --     moveplayers(0, 1)
-    -- end
-
-
 end
 
 function _draw()
@@ -142,13 +188,13 @@ function _draw()
     end
     rectfill(4,4,123,123,0)
 
+
     --draw map
-    map(0,0,4,4,15,15)
+    map(level.x,level.y,4,4,15,15)
 
     --draw players
     spr(1, topplayer.x + 4, topplayer.y + 4) 
     spr(2, botplayer.x + 4, botplayer.y + 4, 1, 1, false, true)
-
 end
 __gfx__
 0000000080077708b0cc000b000000000000000033333333aaaaaaaa888888880000000000000000000000000000000000000000000000000000000000000000
