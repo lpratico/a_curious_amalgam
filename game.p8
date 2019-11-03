@@ -52,6 +52,7 @@ spritetop = 1
 spritebot = 1
 menuitem = 1
 carrotsprite = 119
+doorsprite = {109, 114}
 
 spriteids = {
     {25, 31, 37, 43}, --females
@@ -89,7 +90,9 @@ level={
     y=0,
     levelnum=1,
     linked=false,
-    state="m"
+    state="m",
+    doorframe = 1,
+    doors = {{0,0}, {0,0}}
 }
 i = 1
 carrott = {45, 55, 65}
@@ -236,6 +239,7 @@ function resetlevel()
     botplayer.y = 48
     botplayer.v = 0
 
+    level.doorframe = 1
     level.linked = false
     
 end
@@ -261,6 +265,12 @@ end
 function checkexit()
     if fget(postosprtop(topplayer.x + 4, topplayer.y + 4),2) then
         if fget(postosprbot(botplayer.x + 4, botplayer.y + 4),2) then
+
+            level.doors = {
+                {flr(topplayer.x/8 + .5), flr(topplayer.y/8 + .5)},
+                {flr(botplayer.x/8 + .5), 14 - flr(botplayer.y/8 + .5)}
+            }
+
             level.levelnum+=1
             level.x += 15
             if (level.x >= 120) then
@@ -268,7 +278,7 @@ function checkexit()
                 level.y += 15
             end
             sfx(7)
-            resetlevel()
+            level.state = "d"
         end
     end
 end
@@ -642,6 +652,29 @@ function _draw()
 
 
         drawcharacters()
+    elseif (level.state == "d") then --door animation
+        rectfill(level.doors[1][1]*8+4, level.doors[1][2]*8+4, level.doors[1][1]*8+4+7, level.doors[1][2]*8+4+7, 0)
+        rectfill(level.doors[2][1]*8+4, level.doors[2][2]*8+4, level.doors[2][1]*8+4+7, level.doors[2][2]*8+4+7, 0)
+        spr(doorsprite[1]+flr(level.doorframe), level.doors[1][1]*8+4, level.doors[1][2]*8+4)
+        spr(doorsprite[2]+flr(level.doorframe), level.doors[2][1]*8+4, level.doors[2][2]*8+4)
+
+        if (topplayer.spritedir == 1) then
+            spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, false, false) 
+        else
+            spr(topplayer.spritecurrent, topplayer.x + 4, topplayer.y + 4, 1, 1, true, false) 
+        end
+
+        if (botplayer.spritedir == 1) then
+            spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, false, true)
+        else
+            spr(botplayer.spritecurrent, botplayer.x + 4, mapheight - botplayer.y - 4, 1, 1, true, true)
+        end
+
+        level.doorframe +=.25
+        if(level.doorframe >= 5) then
+            level.state = "g"
+            resetlevel()
+        end
     end
 
 end
